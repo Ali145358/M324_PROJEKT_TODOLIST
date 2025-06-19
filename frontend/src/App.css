@@ -46,3 +46,13 @@ img {
 .read-the-docs {
   color: #888;
 }
+
+.RegisterButton {
+  background-color: #f43939;
+  color: white;
+  border: none;
+  padding: 0.5em 1em;
+  border-radius: 0.25em;
+  cursor: pointer;
+  margin-top: 10px;
+}
