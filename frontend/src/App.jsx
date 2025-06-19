@@ -95,16 +95,18 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <h1>
-          ToDo Liste
+          Missionen
         </h1>
         <form onSubmit={handleSubmit} className='todo-form'>
-          <label htmlFor="taskdescription">Neues Todo anlegen:</label>
+          <label htmlFor="taskdescription">Neue Mission registrieren: </label>
           <input
             type="text"
             value={taskdescription}
             onChange={handleChange}
           />
-          <button type="submit">Absenden</button>
+          <div className="button-container">
+          <button className='RegisterButton' type="submit">Registrieren</button>
+          </div>
         </form>
         <div>
           {renderTasks(todos)}
