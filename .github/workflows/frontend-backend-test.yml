@@ -3,10 +3,9 @@
 
 name: Java & Frontend CI
 
-on:
+on: 
   push:
-    branches: [ "main" ]
-on:
+      branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
