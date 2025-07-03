@@ -48,7 +48,7 @@ function App() {
     setTasks((prev) => prev.filter((t) => t.id !== id));
 
     // Optional: Backend informieren
-    fetch(`http://localhost:8080/api/tasks/${id}`, {
+    fetch(`http://backend:8080/api/tasks/${id}`, {
       method: 'DELETE',
     }).catch((err) =>
       console.error('Fehler beim Löschen der Aufgabe:', err)
