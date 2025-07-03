@@ -40,5 +40,5 @@ Alle Änderungen als abgeschlossen markiert.
 
 ---
 
-*Dokument erstellt am {DATUM}*  
+*Dokument erstellt am 19.06.2025*  
 *Für detaillierte Ansicht: `git log --oneline --graph`*
