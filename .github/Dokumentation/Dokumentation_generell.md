@@ -46,6 +46,12 @@ Recherchiert gemeinsam:
 2. was welche Vorteile DevOps bietet 
 3. welche Probleme mit DevOps gelöst werden 
 
+
+###### und wir haben ein sie folgendermassen beantwortet
+Siehe: 
+
+*Modul324/Loreno Biffi/Kursnotizen/Sidequest 1A*
+
 ## Sidequest 1B
 
 ###### Wir haben die Folgenden Fragen recherchiert und dann im Plenum besprochen:-
