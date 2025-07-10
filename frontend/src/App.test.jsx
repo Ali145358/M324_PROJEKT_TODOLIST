@@ -19,14 +19,14 @@ beforeEach(() => {
       const body = JSON.parse(options.body);
       const newTask = { id: nextId++, taskdescription: body.taskdescription };
       mockTasks.push(newTask);
-      return Promise.resolve({ ok: true, json: () => Promise.resolve(newTask) });
+      return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTasks) });
     }
 
     // Mock für das Löschen von Tasks (POST /api/v1/delete)
     if (urlObject.pathname.endsWith('/delete') && options?.method === 'POST') {
       const body = JSON.parse(options.body);
       mockTasks = mockTasks.filter(task => task.taskdescription !== body.taskdescription);
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTasks) });
     }
 
     // Mock für das Abrufen aller Tasks (GET /api/v1/)
