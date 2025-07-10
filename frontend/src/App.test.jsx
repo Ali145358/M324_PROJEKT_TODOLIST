@@ -2,26 +2,40 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import App from './App';
 
-let mockId = 1;
+// Simuliert eine kleine In-Memory-Datenbank für die Tests
+let mockTasks = [];
 
+// Mock für die globale fetch-Funktion
 beforeEach(() => {
-  mockId = 1; // Reset ID before each test
+  // Setzt die Mock-Datenbank vor jedem Test zurück
+  mockTasks = [];
+  let nextId = 1;
+
   global.fetch = vi.fn((url, options) => {
-    if (options?.method === 'POST') {
+    const urlObject = new URL(url);
+
+    // Mock für das Hinzufügen von Tasks (POST /api/v1/tasks)
+    if (urlObject.pathname.endsWith('/tasks') && options?.method === 'POST') {
       const body = JSON.parse(options.body);
-      return Promise.resolve({
-        json: () =>
-          Promise.resolve({
-            id: mockId++, // use consecutive ID
-            ...body,
-          }),
-      });
+      const newTask = { id: nextId++, taskdescription: body.taskdescription };
+      mockTasks.push(newTask);
+      return Promise.resolve({ ok: true, json: () => Promise.resolve(newTask) });
     }
 
-    // GET-Fallback
-    return Promise.resolve({
-      json: () => Promise.resolve([]),
-    });
+    // Mock für das Löschen von Tasks (POST /api/v1/delete)
+    if (urlObject.pathname.endsWith('/delete') && options?.method === 'POST') {
+      const body = JSON.parse(options.body);
+      mockTasks = mockTasks.filter(task => task.taskdescription !== body.taskdescription);
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+    }
+
+    // Mock für das Abrufen aller Tasks (GET /api/v1/)
+    if (urlObject.pathname.endsWith('/api/v1/') && options?.method !== 'POST') {
+      return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTasks) });
+    }
+
+    // Fallback für unerwartete Anfragen
+    return Promise.reject(new Error(`Unmocked fetch call: ${options?.method} ${url}`));
   });
 });
 

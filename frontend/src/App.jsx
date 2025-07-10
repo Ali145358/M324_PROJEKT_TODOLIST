@@ -31,9 +31,10 @@ function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newTask),
     })
-      .then(() => {
+      .then((res) => res.json()) // Get the updated list from the response
+      .then((data) => {
+        setTasks(data); // Set the new list
         setTaskDescription('');
-        fetchTasks(); // Daten neu laden, um die Liste zu aktualisieren
       })
       .catch((err) => {
         console.error('Fehler beim Erstellen der Aufgabe:', err);
@@ -47,12 +48,13 @@ function App() {
     };
 
     fetch(`http://localhost:8080/api/v1/delete`, {
-      method: 'POST', // Methode auf POST geändert, wie vom Backend erwartet
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(taskToDelete), // Sendet das Task-Objekt
     })
-      .then(() => {
-        fetchTasks(); // Daten neu laden, um die Liste zu aktualisieren
+      .then((res) => res.json()) // Get the updated list from the response
+      .then((data) => {
+        setTasks(data); // Set the new list
       })
       .catch((err) =>
         console.error('Fehler beim Löschen der Aufgabe:', err)

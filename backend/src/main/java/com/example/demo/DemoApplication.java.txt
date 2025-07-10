@@ -8,10 +8,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
-import java.util.Collections;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +28,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @RestController
 @SpringBootApplication
-
 public class DemoApplication {
 
     private List<Task> tasks = new ArrayList<>();
@@ -40,22 +37,23 @@ public class DemoApplication {
     }
 
     @Bean
-    public CorsFilter corsFilter() {
-        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        final CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        // Allow all localhost origins for development
-        config.setAllowedOriginPatterns(Collections.singletonList("http://localhost:*"));
-        config.setAllowedHeaders(Collections.singletonList("*"));
-        config.setAllowedMethods(Collections.singletonList("*"));
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:5173") // Frontend-Port
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
+            }
+        };
     }
 
-
-    @GetMapping("/api/v1/")
+    @CrossOrigin
+    @GetMapping("/")
     public List<Task> getTasks() {
-        System.out.println("API v1 EP '/' returns task-list of size " + tasks.size() + ".");
+        System.out.println("API EP '/' returns task-list of size " + tasks.size() + ".");
         if (tasks.size() > 0) {
             int i = 1;
             for (Task task : tasks) {
@@ -65,17 +63,17 @@ public class DemoApplication {
         return tasks; // actual task list (internally converted to a JSON stream)
     }
 
-
-    @PostMapping("/api/v1/tasks")
-    public List<Task> addTask(@RequestBody String taskdescription) {
-        System.out.println("API v1 EP '/tasks': '" + taskdescription + "'");
+    @CrossOrigin
+    @PostMapping("/tasks")
+    public String addTask(@RequestBody String taskdescription) {
+        System.out.println("API EP '/tasks': '" + taskdescription + "'");
         ObjectMapper mapper = new ObjectMapper();
         try {
             Task task = mapper.readValue(taskdescription, Task.class);
             for (Task t : tasks) {
                 if (t.getTaskdescription().equals(task.getTaskdescription())) {
                     System.out.println(">>>task: '" + task.getTaskdescription() + "' already exists!");
-                    return tasks; // duplicates will be ignored
+                    return "redirect:/"; // duplicates will be ignored
                 }
             }
             System.out.println("...adding task: '" + task.getTaskdescription() + "'");
@@ -83,13 +81,13 @@ public class DemoApplication {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        return tasks;
+        return "redirect:/";
     }
 
-
-    @PostMapping("/api/v1/delete")
-    public List<Task> delTask(@RequestBody String taskdescription) {
-        System.out.println("API v1 EP '/delete': '" + taskdescription + "'");
+    @CrossOrigin
+    @PostMapping("/delete")
+    public String delTask(@RequestBody String taskdescription) {
+        System.out.println("API EP '/delete': '" + taskdescription + "'");
         ObjectMapper mapper = new ObjectMapper();
         try {
             Task taskToDelete = mapper.readValue(taskdescription, Task.class);
@@ -99,13 +97,13 @@ public class DemoApplication {
                 if (currentTask.getTaskdescription().equals(taskToDelete.getTaskdescription())) {
                     System.out.println("...deleting task: '" + taskToDelete.getTaskdescription() + "'");
                     it.remove();
-                    return tasks;
+                    return "redirect:/";
                 }
             }
             System.out.println(">>>task: '" + taskToDelete.getTaskdescription() + "' not found!");
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        return tasks;
+        return "redirect:/";
     }
 }
