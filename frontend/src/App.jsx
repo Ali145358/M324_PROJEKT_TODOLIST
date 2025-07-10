@@ -5,78 +5,82 @@ function App() {
   const [taskDescription, setTaskDescription] = useState('');
   const [tasks, setTasks] = useState([]);
 
-  useEffect(() => {
-    // Initialdaten vom Backend holen
-    fetch('http://localhost:8080/api/tasks')
+  // Holt die Tasks vom Backend, wenn die Komponente geladen wird
+  const fetchTasks = () => {
+    fetch('http://localhost:8080/api/v1/')
       .then((res) => res.json())
       .then((data) => setTasks(data))
       .catch((err) => console.error('Fehler beim Laden der Tasks:', err));
+  };
+
+  useEffect(() => {
+    fetchTasks();
   }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!taskDescription.trim()) return;
 
     const newTask = {
-      description: taskDescription.trim(),
-      done: false,
+      taskdescription: taskDescription.trim(),
     };
 
-    // Optional: An Backend senden
-    fetch('http://localhost:8080/api/tasks', {
+    // Sendet den neuen Task an das Backend
+    fetch('http://localhost:8080/api/v1/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newTask),
     })
-      .then((res) => res.json())
-      .then((createdTask) => {
-        setTasks((prev) => [...prev, createdTask]);
+      .then(() => {
         setTaskDescription('');
+        fetchTasks(); // Daten neu laden, um die Liste zu aktualisieren
       })
       .catch((err) => {
         console.error('Fehler beim Erstellen der Aufgabe:', err);
-        // Fallback für Testbetrieb ohne Backend:
-        setTasks((prev) => [...prev, { ...newTask, id: Date.now() }]);
-        setTaskDescription('');
       });
   };
 
-  // Löschen-Handler: entfernt aus State und ruft DELETE-API auf
-  const handleDelete = (id) => {
-    // State aktualisieren
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+  // Löschen-Handler: sendet die zu löschende Aufgabe an das Backend
+  const handleDelete = (description) => {
+    const taskToDelete = {
+      taskdescription: description,
+    };
 
-    // Optional: Backend informieren
-    fetch(`http://backend:8080/api/tasks/${id}`, {
-      method: 'DELETE',
-    }).catch((err) =>
-      console.error('Fehler beim Löschen der Aufgabe:', err)
-    );
+    fetch(`http://localhost:8080/api/v1/delete`, {
+      method: 'POST', // Methode auf POST geändert, wie vom Backend erwartet
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(taskToDelete), // Sendet das Task-Objekt
+    })
+      .then(() => {
+        fetchTasks(); // Daten neu laden, um die Liste zu aktualisieren
+      })
+      .catch((err) =>
+        console.error('Fehler beim Löschen der Aufgabe:', err)
+      );
   };
 
   return (
     <div className="App">
       <header className="App-header">
         <img src="/src/assets/react.svg" className="App-logo" alt="logo" />
-        <h1>ToDo Liste</h1>
-        <form className="todo-form" onSubmit={handleSubmit}>
-          <label htmlFor="taskdescription">Neues Todo anlegen:</label>
-          <input
-            id="taskdescription"
-            type="text"
-            value={taskDescription}
-            onChange={(e) => setTaskDescription(e.target.value)}
-          />
-          <button type="submit">Absenden</button>
-        </form>
-        <div>
+        <h1>ToDo Liste </h1>
+        <div className="todo-container">
+          <form className="todo-form" onSubmit={handleSubmit}>
+            <label htmlFor="taskdescription">Neues Todo anlegen:</label>
+            <input
+              id="taskdescription"
+              type="text"
+              value={taskDescription}
+              onChange={(e) => setTaskDescription(e.target.value)}
+            />
+            <button type="submit">Absenden</button>
+          </form>
           <ul className="todo-list">
             {tasks.map((task) => (
-              <li key={task.id} className="todo-item">
-                {task.description}
+              <li key={task.taskdescription} className="todo-item">
+                {task.taskdescription}
                 <button
-                  onClick={() => handleDelete(task.id)}
+                  onClick={() => handleDelete(task.taskdescription)} // Übergibt die Beschreibung
                   aria-label="Löschen"
                   className="delete-button"
                 >
@@ -92,3 +96,4 @@ function App() {
 }
 
 export default App;
+
